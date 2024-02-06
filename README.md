@@ -4,15 +4,24 @@ Decomposition Into Single-COpy gene trees ([DISCO](https://doi.org/10.1093/sysbi
 
 **NOTE:** For species tree estimation default settings are recommended; however, for orthology detection using `-m 2` is recommended so small groups are retrieved. It is also highly recommended that you use the most recent version of DISCO, as it deals with some limitations of TreeSwift.
 
+# DISCO-R
+
+DISCO-R (DISCO with a Refined pruning strategy) is a modification of DISCO that provably retains more speciation-driven quartets than DISCO. This repository contains the variants of DISCO used in the experiments of Hakim et al. 
+
+
 ## Versions
 
+DISCO:
 - v1.0 (May 21st 2021): Initial Release
 - v1.1 (July 19th, 2021): Added `ca_disco.py` and adjustable filter (instead of just filtering all trees with less than 4 taxa)
 - v1.2 (June 8th, 2022): Tree rerooting fix (addresses issue with treeswift rooting with no edge lengths)
 - v1.3 (July 8th, 2022): Allows for more flexibility with leaf labels
-- v1.3.1 (October 31st, 2022): Fixes issue where extra newline character at the end of the file causes a crash 
+- v1.3.1 (October 31st, 2022): Fixes issue where extra newline character at the end of the file causes a crash
 
-**Note:** At present, it is recommended to use the latest version if you want to run the DISCO algorithm as described in Willson et al. 2021, as using earlier versions can causes results inconsistent with the DISCO algorithm in rare cases. 
+DISCO-R
+- v1.0 (Feb 7th 2024): Readme Updated
+
+**Note:** At present, it is recommended to use the latest version if you want to run the DISCO algorithm as described in Willson et al. 2021, as using earlier versions can cause results inconsistent with the DISCO algorithm in rare cases. 
 
 ## Citation
 
@@ -30,12 +39,27 @@ If you use DISCO, please cite:
 }
 ```
 
+If you use DISCO-R, please cite:
+```
+@article {Hakim2023.12.05.570122,
+	author = {Sheikh Azizul Hakim and MD Rownok Zahan Ratul and Md. Shamsuzzoha Bayzid},
+	title = {wQFM-DISCO: DISCO-enabled wQFM improves phylogenomic analyses despite the presence of paralogs},
+	elocation-id = {2023.12.05.570122},
+	year = {2023},
+	doi = {10.1101/2023.12.05.570122},
+	publisher = {Cold Spring Harbor Laboratory},
+	journal = {bioRxiv}
+}
+```
+
 ## Algorithm
 
 Given a list of multi-copy gene trees, DISCO does the following for each tree:
 
 1. Root the tree and tag each internal vertex as either a duplication event or a speciation event in such a way that minimizes the total number of duplications and losses. We do this with the ASTRAL-Pro rooting and tagging algorithm ([Zhang et. al. 2020](https://doi.org/10.1093/molbev/msaa139)).
 2. Decompose gene tree by splitting off the smallest subtree under every vertex tagged as a duplication from the leaves to the root until all duplication events are resolved; it returns the set of single-copy trees produced.
+
+Please check ``variants.pdf`` for the DISCO variants introduced by Hakim et al. 
 
 ## Dependencies
 
