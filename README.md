@@ -20,6 +20,7 @@ DISCO:
 
 DISCO-R
 - v1.0 (Feb 7th 2024): Readme Updated
+- v2.0 (Oct 27th 2026): All eight variants merged into a single `disco.py` (`--variant 1..8`, or the individual `--prune/--side/--dup-cost/--loss-cost/--random-costs` options). Species sets are bitmasks and DISCO-R no longer copies subtrees repeatedly (~2.5-3x faster on 2,000-leaf trees). Fixes: DISCO-R could silently drop a valid re-added subtree; DISCO-R now compares species (not raw leaf labels) when `-d` is used; `--outgroups` no longer crashes.
 
 **Note:** At present, it is recommended to use the latest version if you want to run the DISCO algorithm as described in Willson et al. 2021, as using earlier versions can cause results inconsistent with the DISCO algorithm in rare cases. 
 
@@ -59,7 +60,20 @@ Given a list of multi-copy gene trees, DISCO does the following for each tree:
 1. Root the tree and tag each internal vertex as either a duplication event or a speciation event in such a way that minimizes the total number of duplications and losses. We do this with the ASTRAL-Pro rooting and tagging algorithm ([Zhang et. al. 2020](https://doi.org/10.1093/molbev/msaa139)).
 2. Decompose gene tree by splitting off the smallest subtree under every vertex tagged as a duplication from the leaves to the root until all duplication events are resolved; it returns the set of single-copy trees produced.
 
-Please check ``variants.pdf`` for the DISCO variants introduced by Hakim et al. 
+Please check ``variants.pdf`` for the DISCO variants introduced by Hakim et al. All of them are run through `disco.py`:
+
+| `--variant` | Pruning | Pruned subtree | Dup | Loss | Equivalent options |
+|---|---|---|---|---|---|
+| 1 | DISCO | smaller | 1 | 1 | (default) |
+| 2 | DISCO | larger | 1 | 1 | `--side larger` |
+| 3 | DISCO | random | 1 | 1 | `--side random` |
+| 4 | DISCO-R | smaller | 1 | 1 | `--prune refined` |
+| 5 | DISCO | smaller | 1 | 0.5 | `--loss-cost 0.5` |
+| 6 | DISCO-R | smaller | 1 | 0.5 | `--prune refined --loss-cost 0.5` |
+| 7 | DISCO | smaller | random | random | `--random-costs` |
+| 8 | DISCO-R | smaller | random | random | `--prune refined --random-costs` |
+
+Use `--seed` to make variants 3, 7 and 8 reproducible.
 
 ## Dependencies
 
@@ -93,7 +107,7 @@ python3 disco.py -i <input_file> -o <ouput_file> -d <delimiter>
 ```
 -o, --output          Output newick tree file
 -d, --delimiter       Delimiter separating species name from rest of leaf label
--s, --single-tree     Output only single large tree per gene tree 
+-s, --single-tree     Output only single large tree per gene tree
 -n, --nth-delimiter   Split on Nth delimiter (only works with -d)
 -m, --minimum         Minimum number of taxa required for tree to be outputted
 -v, --verbose         Enable verbose output
@@ -103,10 +117,24 @@ python3 disco.py -i <input_file> -o <ouput_file> -d <delimiter>
 --remove-in-paralogs  Remove in-paralogs before rooting/scoring
 ```
 
+##### Variants
+
+```
+-V, --variant         Preset 1-8 from Hakim et al. (overrides the options below)
+-r, --prune           disco (default) or refined (DISCO-R)
+--side                smaller (default), larger or random: subtree pruned at a duplication
+--dup-cost            Duplication cost used for rooting (default 1)
+--loss-cost           Loss cost used for rooting (default 1)
+--random-costs        Random duplication/loss costs
+--seed                Random seed
+```
+
 #### Example
 
 ```cmd
-python3 tag_decomp.py -i example/gtrees-mult.trees
+python3 disco.py -i example/g_100-mult.trees                 # DISCO
+python3 disco.py -i example/g_100-mult.trees --variant 4     # DISCO-R
+python3 disco.py -i example/g_100-mult.trees -V 8 --seed 1   # DISCO-R, random costs
 ```
 
 ### ca_disco.py
